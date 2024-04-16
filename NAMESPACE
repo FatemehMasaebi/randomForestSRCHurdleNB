@@ -1,4 +1,4 @@
-useDynLib(randomForestSRCP, .registration = TRUE)
+useDynLib(randomForestSRCHurdleNB, .registration = TRUE)
 
 importFrom("data.tree", "FromDataFrameNetwork", "SetGraphStyle",
            "SetEdgeStyle", "SetNodeStyle", "Do", "GetDefaultTooltip")
