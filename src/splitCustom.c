@@ -1,12 +1,14 @@
 #include  <stdlib.h>
 #include  <math.h>
-#include  "splitCustom.h"
 
 #include <R.h>
 #include <Rmath.h>
 #include <R_ext/Random.h>
 #include <R_ext/Utils.h>
 #include <stdio.h>
+#include  "splitCustom.h"
+
+#define EPSILON 1e-6
 
 /*
 
@@ -49,8 +51,8 @@ void registerCustomFunctions() {
   // split rule in the second slot, along with the regression split
   // rule in the second slot if the respones contain factors and reals.
 
-  //  registerThis (&getCustomSplitStatisticMultivariateClassificationTwo, CLAS_FAM, 2);
-  //  registerThis (&getCustomSplitStatisticMultivariateRegressionTwo, REGR_FAM, 2);
+   registerThis (&getCustomSplitztnb, CLAS_FAM, 2);
+   registerThis (&getCustomSplitztnb, REGR_FAM, 2);
   //  registerThis (&getCustomSplitStatisticSurvivalTwo, SURV_FAM, 2);
   //  registerThis (&getCustomSplitStatisticCompetingRiskTwo, CRSK_FAM, 2);
 
@@ -257,6 +259,293 @@ if(!sumRght==0) sumRghtSqr+= -(double)(Nplus_right)*log(1.-exp(-(double)(sumRght
 }
 
 
+//##############################################################################//
+////////////////////// Newton Raphson Function to resolve a non-linear equation ////////////////////////////////////////////
+
+double log_pnbinom(int q, double mu, double theta,int lower_tail){
+  double ret;
+  ret= lgamma(q+theta)-lgamma(theta)-lgamma(q+1)+
+    theta * log(1/(1+mu/theta))+ q*log(mu/(mu+theta));
+  if(lower_tail==0){
+    ret=  log(1-exp(ret));
+  }
+  
+  return ret;
+  
+}
+
+double log_likelihood (double lmu, double ltheta, double *data , int n) {
+  double mu, theta;
+  double log_likelihood = 0.0;
+  double p_zero;
+  
+  mu=exp(lmu);
+  theta=exp(ltheta);
+  p_zero=pow(1/(1+mu/theta),theta);
+  
+  for (int i=1;i<=n; i++) {
+    log_likelihood += lgamma(data[i]+theta)-lgamma(theta)-lgamma(data[i]+1)+
+      theta * log(1/(1+mu/theta))+ data[i]*log(mu/(mu+theta))-
+      log(1-p_zero);
+    
+  }
+  
+  return log_likelihood;
+}
+
+double grad_ll_lmu (double lmu, double ltheta, double *data, int n ) {
+  double mu, theta, logratio, dll_lmu=0.0;
+  
+  mu = exp(lmu);
+  theta = exp(ltheta);
+  
+  logratio=log_pnbinom(0, mu, theta,1) -
+    log_pnbinom(0, mu, theta,0);
+  
+  for(int i=1;i<=n; i++){
+    dll_lmu+= (data[i] - mu * (data[i] + theta)/(mu + theta)) -
+      exp(logratio + log(theta) - log(mu + theta) + log(mu));
+  }
+  
+  
+  return dll_lmu;
+}
+
+double grad_ll_ltheta (double lmu, double ltheta, double *data, int n) {
+  double mu, theta, logratio, dll_ltheta=0.0;
+  
+  mu = exp(lmu);
+  theta = exp(ltheta);
+  
+  logratio=log_pnbinom(0, mu, theta,1) -
+    log_pnbinom(0, mu, theta,0);
+  
+  for(int i=1;i<=n; i++){
+    dll_ltheta += ((digamma(data[i] + theta) - digamma(theta) + log(theta) -
+      log(mu + theta) + 1 - (data[i] + theta)/(mu + theta) +
+      exp(logratio) * (log(theta) - log(mu + theta) + 1 -
+      theta/(mu + theta))) ) * theta;
+    
+  }
+  
+  return dll_ltheta;
+  
+}
+
+double grad_ll_lmu2 (double lmu, double ltheta, double *data, int n){
+  double h= 1e-8;
+  double d2ll_lmu2;
+  
+  d2ll_lmu2=(grad_ll_lmu(lmu+h,ltheta,data, n)-grad_ll_lmu(lmu,ltheta,data, n))/h;
+  
+  return d2ll_lmu2;
+  
+}
+
+double grad_ll_ltheta2 (double lmu, double ltheta, double *data, int n){
+  double h= 1e-8;
+  double a,b, d2ll_ltheta2;
+  a=grad_ll_ltheta(lmu,ltheta+h,data, n);
+  b=grad_ll_ltheta(lmu,ltheta,data, n);
+  d2ll_ltheta2=(a-b)/h;
+  
+  return d2ll_ltheta2;
+  
+}
+
+double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n){
+  double h= 1e-8;
+  double mu ,theta, logratio, muh, thetah,logratioh;
+  double rvalmu=0.0, rvalmutheta=0.0;
+  double d2ll_lmultheta;
+  
+  mu=exp(lmu);
+  theta=exp(ltheta);
+  
+  muh=exp(lmu+h);
+  thetah=exp(ltheta+h);
+  
+  logratio = log_pnbinom(0, mu, theta, 1) - log_pnbinom(0,mu,theta,0);
+  logratioh = log_pnbinom(0,  mu, thetah, 1) - log_pnbinom(0,  mu, thetah, 0);
+  
+  for(int i=1;i<=n;i++){
+    rvalmutheta+= ((data[i] - mu * (data[i] + thetah)/(mu + thetah)) -
+      exp(logratioh + log(thetah) - log(mu + thetah) + log(mu)));
+    
+    rvalmu+=((data[i] - mu * (data[i] + theta)/(mu + theta)) -
+      exp(logratio + log(theta) - log(mu + theta) + log(mu)));
+    
+  }
+  
+  d2ll_lmultheta=(rvalmutheta-rvalmu)/h;
+  
+  return d2ll_lmultheta;
+}
+
+//
+void newtonRaphson ( double *est_par, double *data, int n) {
+  double tol = 1e-5;
+  int max_iter = 200;
+  double step_size = 1;
+  // Initial values for mu and theta
+  
+  double tempsum=0.0;
+  for( int i=1;i<=n;i++){
+    tempsum+=data[i];
+    
+  }
+  
+  est_par[0]= log(tempsum/n);
+  est_par[1]=0.5;
+  
+  double hess11, hess22, hess12, hess21,  hess_det_inv;
+  double hess_inv11, hess_inv22, hess_inv12, hess_inv21;
+  double update_est_lmu ,update_est_ltheta;
+  
+  int iter = 0;
+  do {
+    hess11=grad_ll_lmu2(est_par[0],est_par[1],data,n);
+    hess22=grad_ll_ltheta2(est_par[0],est_par[1],data,n);
+    hess12=grad_ll_lmultheta(est_par[0],est_par[1],data,n);
+    hess21=hess12;
+    
+    hess_det_inv= 1/(hess11*hess22 - hess12*hess21);
+    
+    hess_inv11=hess_det_inv*hess22;
+    hess_inv22=hess_det_inv*hess11;
+    hess_inv12= -hess_det_inv*hess12;
+    hess_inv21= -hess_det_inv*hess21;
+    
+    update_est_lmu = hess_inv11*grad_ll_lmu(est_par[0],est_par[1],data,n) + hess_inv12*grad_ll_ltheta(est_par[0],est_par[1],data,n) ;
+    update_est_ltheta = hess_inv21*grad_ll_lmu(est_par[0],est_par[1],data,n) +  hess_inv22*grad_ll_ltheta(est_par[0],est_par[1],data,n) ;
+    
+    est_par[0] -=   update_est_lmu;
+    est_par[1] -=  update_est_ltheta;
+    // printf("lmu=%f,iter=%d ,n=%d\n", est_par[0],iter,n);
+    
+    iter++;
+    
+  } while ((fabs(update_est_lmu) > tol || fabs(update_est_ltheta) > tol) && iter < max_iter);
+  
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+double getCustomSplitztnb (unsigned int n,
+                           char        *membership,
+                           double      *time,
+                           double      *event,
+                           
+                           unsigned int eventTypeSize,
+                           unsigned int eventTimeSize,
+                           double      *eventTime,
+                           
+                           double      *response,
+                           double       mean,
+                           double       variance,
+                           unsigned int maxLevel,
+                           
+                           double     **feature,
+                           unsigned int featureCount)
+{
+  
+  // EXAMPLE:  Multivariate Regression
+  
+  // Local variables needed for this example:
+  double sumLeft, sumRght;
+  double sumLeftSqr, sumRghtSqr;
+  double delta;
+  
+  // Left and right normalization sizes.
+  unsigned int leftSize, rghtSize;
+  
+  unsigned int i;
+  
+  // Initialization of local variables:
+  sumLeft = sumRght = 0.0;
+  leftSize = rghtSize = 0;
+  
+  delta = 0.0;
+  
+  int sum_eve_left;
+  sum_eve_left=0;
+  
+  int sum_eve_right;
+  sum_eve_right=0;
+  
+  int N0_left,Nplus_left,N0_right,Nplus_right;
+  N0_left=Nplus_left=N0_right=Nplus_right=0;
+  
+  
+  
+  // In general, calculating a split statistic will require iterating
+  // over all members in the parent node, and ascertaining daughter
+  // membership, and performing a well defined calculation based on
+  // membership.  In this example, the sum of the difference from the
+  // mean for the y-outcome in each daughter node is calculated.
+  
+  for (i=0; i<n; i++) {
+    // Membership will be either LEFT or RIGHT.
+    if (membership[i] == LEFT) {
+      // Add the left member to the sum.
+      sum_eve_left=response[i];
+      if(sum_eve_left==0) N0_left+=1;
+      else Nplus_left+=1;
+      
+      sumLeft+= response[i];
+      leftSize ++;
+      
+    }
+    else {
+      sum_eve_right=response[i];
+      if(sum_eve_right==0) N0_right+=1;
+      else Nplus_right+=1;
+      sumRght+= response[i];
+      rghtSize ++;
+      
+    }
+  }
+  
+  
+  unsigned int jl, jr;
+  jl=jr=1;
+  double responseL[Nplus_left];
+  double responseR[Nplus_right];
+  
+  for (i=0; i<n; i++) {
+    // Membership will be either LEFT or RIGHT.
+    if (membership[i] == LEFT) {
+      // Add the left member to the sum.
+      sum_eve_left=response[i];
+      if(sum_eve_left!=0){
+        responseL[jl]=response[i];
+        jl++;
+      }
+    }
+    else {
+      sum_eve_right=response[i];
+      if(sum_eve_right!=0) {
+        responseR[jr]=response[i];
+        jr++;
+      }
+    }
+    
+  }
+  
+  double test_par[2]={1.00,0.5};
+  
+  newtonRaphson(test_par,responseL,Nplus_left);
+  sumLeftSqr=log_likelihood(test_par[0],test_par[1], responseL, Nplus_left);
+  // est_par[2]={1,0.5};
+  newtonRaphson(test_par,responseR,Nplus_right);
+  sumRghtSqr=log_likelihood(test_par[0],test_par[1], responseR, Nplus_right);
+  
+  delta = sumLeftSqr +sumRghtSqr;
+  return delta;
+}
+
+//#################################################################//
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double getCustomSplitStatisticMultivariateRegression (unsigned int n,
                                                       char        *membership,

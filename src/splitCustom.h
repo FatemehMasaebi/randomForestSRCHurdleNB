@@ -74,6 +74,32 @@ double getCustomSplitZipPoisson (unsigned int n,
                                                       unsigned int featureCount);
 
 
+double log_pnbinom(int q, double mu, double theta,int lower_tail);
+double log_likelihood (double lmu, double ltheta, double *data , int n);
+double grad_ll_lmu (double lmu, double ltheta, double *data, int n );
+double grad_ll_ltheta (double lmu, double ltheta, double *data, int n);
+double grad_ll_lmu2 (double lmu, double ltheta, double *data, int n);
+double grad_ll_ltheta2 (double lmu, double ltheta, double *data, int n);
+double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n);
+
+void newtonRaphson ( double *est_par, double *data, int n);
+
+double getCustomSplitztnb (unsigned int n,
+                           char        *membership,
+                           double      *time,
+                           double      *event,
+                           
+                           unsigned int eventTypeSize,
+                           unsigned int eventTimeSize,
+                           double      *eventTime,
+                           
+                           double      *response,
+                           double       mean,
+                           double       variance,
+                           unsigned int maxLevel,
+                           
+                           double     **feature,
+                           unsigned int featureCount);
 
 
 double getCustomSplitStatisticMultivariateRegression  (unsigned int  n,
@@ -92,6 +118,7 @@ double getCustomSplitStatisticMultivariateRegression  (unsigned int  n,
                                                        
                                                        double      **feature,
                                                        unsigned int  featureCount);
+
 
 
 double getCustomSplitStatisticMultivariateClassification (unsigned int  n,
