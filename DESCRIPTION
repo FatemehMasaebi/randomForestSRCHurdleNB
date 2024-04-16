@@ -1,6 +1,6 @@
-Package: randomForestSRCP
-Version: 3.1.1
-Date: 2022-07-06
+Package: randomForestSRCHurdleNB
+Version: 1.0.0
+Date: 2024-16-04
 Title: Fast Unified Random Forests for Survival, Regression, and
         Classification (RF-SRC)
 Author: Hemant Ishwaran <hemant.ishwaran@gmail.com>, Udaya B. Kogalur <ubk@kogalur.com>
