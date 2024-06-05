@@ -15,7 +15,6 @@ and Split custom 2, designed for count responses following a Negative Binomial d
 The methodology is detailed in Mathlouthi et al. (2020) < doi: 10.1177/0962280219888741> and Masaebi et al. (2024). 
 The 'randomForestSRC' package implements 'OpenMP' by default, contingent upon the support provided by 
 the target architecture and operating system.
-URL: https://www.randomforestsrc.org/ https://ishwaran.org/
 NeedsCompilation: yes
 Repository: CRAN
 Date/Publication: 
