@@ -5,15 +5,11 @@ Title:randomForestSRCHurdleNB
 Author: Fatemeh Masaebi, Morteza Mohammadzadeh, Denis Larocque, Farid Zayei
 Depends: R (>= 3.6.0),
 Imports: parallel, data.tree, DiagrammeR
-Description: randomForestSRCHurdleNB is a method for estimating the mean parameter and overdispersion of a count response using a set of covariates. 
-In this approach, a random forest tree is constructed with a novel splitting rule so that the best split is the 
-one maximizing the likelihood of child nodes among all allowable splits. 
-'randomForestSRCHurdleNBF' uses 'randomForestSRC' package (Ishwaran and Kogalur, 2022) <https://cran.r-project.org/package=randomForestSRC> 
-by freezing at the version 3.1.0.The custom splitting rule feature is utilised to apply the proposed splitting rule. 
-In this package two types of split rules have been developed for handling count data: Split custom 1, tailored for count responses following a Poisson distribution,
-and Split custom 2, designed for count responses following a Negative Binomial distribution. 
-The methodology is detailed in Mathlouthi et al. (2020) < doi: 10.1177/0962280219888741> and Masaebi et al. (2024). 
-This package can be easily installed by following these steps:
-1. install.packages("devtools")
-2. devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
+Description: randomForestSRCHurdleNB is a method for estimating the mean parameter and overdispersion of a count response using a set of covariates. In this approach, a random forest tree is constructed with a novel splitting rule so that the best split maximizes the likelihood of child nodes among all allowable splits. 'randomForestSRCHurdleNB' utilizes the 'randomForestSRC' package (Ishwaran and Kogalur, 2022) available at https://cran.r-project.org/package=randomForestSRC with version 3.1.0. The custom splitting rule feature is employed to implement the proposed splitting rule. This package introduces two types of split rules for handling count data: Split custom 1, tailored for count responses following a Poisson distribution, and Split custom 2, designed for count responses following a Negative Binomial distribution. The methodology is elaborated in Mathlouthi et al. (2020) doi:10.1177/0962280219888741 and Masaebi et al. (2024).
+
+To install this package, follow these steps:
+
+    Install the 'devtools' package by running: install.packages("devtools")
+    Install the 'randomForestSRCHurdleNB' package from GitHub by executing: devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
+
 Date/Publication: 
