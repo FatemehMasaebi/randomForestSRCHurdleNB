@@ -11,15 +11,14 @@ importFrom("graphics", "abline", "axis", "box", "boxplot", "bxp",
            "strwidth", "text", "title", "grconvertX", "grconvertY", "plot.default")
 importFrom("stats", "as.dist", "as.formula", "cutree", "dlnorm", "formula",
            "hclust", "lowess", "median", "model.matrix", "na.omit",
-           "optim", "pgamma", "plnorm", "pnorm", "predict", 
+           "optim", "pgamma", "plnorm", "pnorm", "predict", "predictNB",
            "quantile", "qnorm", "runif", "sd", "supsmu", "var", "wilcox.test", "rnorm",
            "lm", "coef")
 importFrom("utils", "installed.packages", "txtProgressBar", "setTxtProgressBar",
            "write.table", "tail")
 importFrom("grDevices", "gray")
 
-export(buildtestbop,
-      extract.bootsample,
+export(extract.bootsample,
        extract.quantile,
        extract.subsample,
        find.interaction,
