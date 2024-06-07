@@ -1,4 +1,8 @@
 predictNB = function(rfmodel,dat_test,dist){
+  if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c(".", "tree", "terminalnode", "trainid", "testid",
+                           "bop", "ib_count"))
+}
   buildtestbop <- function (mem.train, mem.test, inbag) {
   ## Inputs
   # mem.train: the terminal node membership of training observations
