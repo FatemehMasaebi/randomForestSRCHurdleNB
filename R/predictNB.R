@@ -1,5 +1,4 @@
 predictNB = function(rfmodel,dat_test,dist){
-  library(data.table)
   buildtestbop <- function (mem.train, mem.test, inbag) {
   ## Inputs
   # mem.train: the terminal node membership of training observations
