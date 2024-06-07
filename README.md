@@ -5,6 +5,69 @@ This package is written and maintained by Fatemeh Masaebi, Morteza Mohammadzadeh
 # Installation
 To install this package, follow these steps:
 1. install.packages("devtools")
-2. devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")"
+2. devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
 # References
 Mathlouthi W, Larocque D, Fredette M. Random forests for homogeneous and non-homogeneous Poisson processes with excess zeros. Statistical Methods in Medical Research. 2020 Aug;29(8):2217-37.
+# Example usage:
+Below is an example illustrating the utilization of the **rfsrc** function with two custom split rules and extracting parameter estimates.
+
+```
+
+library(randomForestSRCHurdleNB)
+library(countreg)
+
+# Load the data
+data("NB_test", package = "randomForestSRCHurdleNB")
+data("NB_train", package = "randomForestSRCHurdleNB")
+
+# Build a RF with the truncated Poisson split rule with the training data
+rfPois = rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, splitrule="custom1", data=NB_train)
+
+# Get estimation for mu for the test data (the estimation for phi is 0)
+yhat0=predict(rfPois,newdata=NB_test)$predicted
+yhat0 = as.integer(yhat0)
+model_Pois = zerotrunc(yhat0 ~ 1, dist = "poisson")
+muhat_Pois = exp(model_Pois$coefficients[[1]])
+
+# Build a RF with the truncated NB split rule with the training data
+rfNB = rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, splitrule="custom2, data=NB_train)
+
+# Get estimation for mu and phi for the test data
+yhat0=predict(rfNB,newdata=NB_test)$predicted
+yhat0 = as.integer(yhat0)
+model_NB = zerotrunc(yhat0 ~ 1, dist ="negbin")
+muhat_nb=exp(model_NB$coefficients[[1]])
+thetahat_nb=model_NB$theta
+phihat_nb=1/model_NB$theta
+ 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
