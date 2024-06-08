@@ -16,7 +16,7 @@ BOP_estimate<-function(irow,rfmodel,dist
             "thetahat_nbbop"=NA,
             "phihat_nbbop"=NA)
       
-      cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      #cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
     }else{
       muhat_ztnb=exp( model$mu.coefficients[[1]])
       thetahat_ztnb=1
@@ -27,7 +27,7 @@ BOP_estimate<-function(irow,rfmodel,dist
             "thetahat_nbbop"=thetahat_ztnb,
             "phihat_nbbop"=phihat_ztnb
       )
-      cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      #cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
       
     }
   }## end if negbin
@@ -57,11 +57,9 @@ BOP_estimate<-function(irow,rfmodel,dist
       phihat_ztnb=1/model$theta
       
       
-      ret=c("muhat_nbbop"=muhat_ztnb,
-            "thetahat_nbbop"=thetahat_ztnb,
-            "phihat_nbbop"=phihat_ztnb
-            
-      )
+      ret=c("muhat"=muhat_ztnb,
+           "phihat"=phihat_ztnb)
+      
       cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
       
     }
@@ -79,19 +77,17 @@ BOP_estimate<-function(irow,rfmodel,dist
             "thetahat_poisbop"=NA,
             "phihat_poisbop"=NA
       )
-      cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      #cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
     }else{
       muhat_ztpois=exp(model$coefficients[[1]])
       thetahat_ztpois=Inf
       phihat_ztpois=0
       
       
-      ret=c("muhat_poisbop"=muhat_ztpois,
-            "thetahat_poisbop"=thetahat_ztpois,
-            "phihat_poisbop"=phihat_ztpois
-            
-      )
-      cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      ret=c("muhat"=muhat_ztpois,
+            "phihat"=phihat_ztpois )
+      
+     # cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
       
     }
   }## end if poisson
