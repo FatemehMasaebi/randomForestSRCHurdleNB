@@ -25,12 +25,14 @@ dat_test = NB_test
 
 # Build a RF with the truncated Poisson split rule with the training data.
 # For simplicity in this example, the value of "ntree" is set to 5.
-rfztpois= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom1", membership = T, data=dat_train)
+rfztpois= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom1",
+membership = T, data=dat_train)
 # Get estimation for mu for the test data (the estimation for phi is 0)
 predictNB(rfztpois, dat_test, dist = "poisson")
 
 # Build a RF with the truncated NB split rule with the training data
-rfztNB= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom2", membership = T, data=dat_train)
+rfztNB= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom2",
+ membership = T, data=dat_train)
 # Get estimation for mu and phi for the test data
 predictNB(rfztNB, dat_test, dist = "negbin")
 
