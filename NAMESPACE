@@ -17,8 +17,13 @@ importFrom("stats", "as.dist", "as.formula", "cutree", "dlnorm", "formula",
 importFrom("utils", "installed.packages", "txtProgressBar", "setTxtProgressBar",
            "write.table", "tail")
 importFrom("grDevices", "gray")
+importFrom("data.table", ":=")
+importFrom("magrittr", "%>%")
+importFrom("countreg", "zerotrunc")
 
-export(extract.bootsample,
+export("buildtestbop_new","buildoobbop_new"
+       ,"bop_index_func","BOP_estimate","predictNB",
+       extract.bootsample,
        extract.quantile,
        extract.subsample,
        find.interaction,
@@ -57,7 +62,6 @@ export(extract.bootsample,
        impute.rfsrc,
        max.subtree,
        max.subtree.rfsrc,
-         prNB,
        partial,
        partial.rfsrc,
        plot.competing.risk,
@@ -72,6 +76,7 @@ export(extract.bootsample,
        plot.variable,
        plot.variable.rfsrc,       
        predict.rfsrc,
+      
        print.rfsrc,
        quantreg,
        quantreg.rfsrc,
