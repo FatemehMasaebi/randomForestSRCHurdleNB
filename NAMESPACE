@@ -71,6 +71,7 @@ export(extract.bootsample,
        plot.variable,
        plot.variable.rfsrc,       
        predict.rfsrc,
+      
        print.rfsrc,
        quantreg,
        quantreg.rfsrc,
