@@ -1,3 +1,14 @@
+#' predictNB 
+#' 
+#' A function to print the words "New function!"
+#'
+#' @return A matrix
+#' @export
+#'
+#' @examples
+#'predictNB ()
+
+
 predictNB = function(rfmodel,dat_test,dist){
   if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "tree", "terminalnode", "trainid", "testid",
