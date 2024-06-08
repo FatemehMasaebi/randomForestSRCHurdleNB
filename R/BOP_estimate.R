@@ -50,7 +50,7 @@ BOP_estimate<-function(irow,rfmodel,dist
             "thetahat_nbbop"=NA,
             "phihat_nbbop"=NA
       )
-      cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      #cat("(zero trunc error) Failed; BOP=",nrow(df) ,";Test id= ",irow,"\r")
     }else{
       muhat_ztnb=exp(model$coefficients[[1]])
       thetahat_ztnb=model$theta
@@ -60,7 +60,7 @@ BOP_estimate<-function(irow,rfmodel,dist
       ret=c("muhat"=muhat_ztnb,
            "phihat"=phihat_ztnb)
       
-      cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
+      #cat("Success; BOP=",nrow(df) ,";Test id= ",irow,"\r")
       
     }
   }## end if negbin
@@ -91,6 +91,6 @@ BOP_estimate<-function(irow,rfmodel,dist
       
     }
   }## end if poisson
-  names(ret)=paste0(names(ret),".",prefix)
+  names(ret)=paste0(names(ret))
   return(ret)
 }
