@@ -1,4 +1,4 @@
-#' predictNB 
+#' prNB
 #' 
 #' A function to print the words "New function!"
 #'
@@ -6,10 +6,10 @@
 #' @export
 #'
 #' @examples
-#'predictNB ()
+#'prNB()
 
 
-predictNB = function(rfmodel,dat_test,dist){
+prNB = function(rfmodel,dat_test,dist){
   if (getRversion() >= "2.15.1") {
   utils::globalVariables(c(".", "tree", "terminalnode", "trainid", "testid",
                            "bop", "ib_count"))
