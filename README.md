@@ -10,7 +10,7 @@ To install this package, follow these steps:
 2. devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
 
 
-# Example usage:
+# Example:
 Below is an example illustrating the utilization of the **rfsrc** function with two custom split rules and extracting parameter estimates.
 
 ```
