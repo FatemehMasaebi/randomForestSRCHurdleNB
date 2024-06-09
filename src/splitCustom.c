@@ -355,14 +355,14 @@ double grad_ll_ltheta2 (double lmu, double ltheta, double *data, int n){
 
 double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n){
   double h= 1e-8;
-  double mu ,theta, logratio, muh, thetah,logratioh;
+  double mu ,theta, logratio,  thetah,logratioh;//muh,
   double rvalmu=0.0, rvalmutheta=0.0;
   double d2ll_lmultheta;
   
   mu=exp(lmu);
   theta=exp(ltheta);
   
-  muh=exp(lmu+h);
+ // muh=exp(lmu+h);
   thetah=exp(ltheta+h);
   
   logratio = log_pnbinom(0, mu, theta, 1) - log_pnbinom(0,mu,theta,0);
@@ -386,7 +386,7 @@ double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n){
 void newtonRaphson ( double *est_par, double *data, int n) {
   double tol = 1e-5;
   int max_iter = 200;
-  double step_size = 1;
+  //double step_size = 1;
   // Initial values for mu and theta
   
   double tempsum=0.0;
