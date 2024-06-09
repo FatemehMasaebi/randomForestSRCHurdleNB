@@ -3,6 +3,8 @@ Version: 1.0.0
 Date: 2024-16-04
 Title:randomForestSRCHurdleNB
 Author: Fatemeh Masaebi, Morteza Mohammadzadeh, Denis Larocque, Farid Zayeri
+Maintainer:		Fatemeh Masaebi
+License: GPL (≥ 3)
 Depends: R (>= 3.6.0),
 Imports: parallel, data.tree, DiagrammeR,countreg,data.table,magrittr
 Description:This package provides custom splitting rules for handling count data following Poisson or Negative Binomial distributions
