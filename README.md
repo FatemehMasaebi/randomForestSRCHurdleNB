@@ -36,6 +36,9 @@ rfztNB= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom2",
 # Get estimation for mu and phi for the test data
 predictNB(rfztNB, dat_test, dist = "negbin")
 
+rfztNB_fast= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom3",
+              membership = T, data=dat_train)
+predictNB(rfztNB_fast, dat_test, dist = "negbin")
 ```
 # References
 Mathlouthi W, Larocque D, Fredette M. Random forests for homogeneous and non-homogeneous Poisson processes with excess zeros. Statistical Methods in Medical Research. 2020 Aug;29(8):2217-37.
