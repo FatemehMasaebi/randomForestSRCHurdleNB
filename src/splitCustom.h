@@ -83,7 +83,7 @@ double grad_ll_ltheta2 (double lmu, double ltheta, double *data, int n);
 double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n);
 
 void newtonRaphson ( double *est_par, double *data, int n);
-
+void newtonRaphson_fast ( double *est_par, double *data, int n);
 double getCustomSplitztnb (unsigned int n,
                            char        *membership,
                            double      *time,
@@ -101,6 +101,22 @@ double getCustomSplitztnb (unsigned int n,
                            double     **feature,
                            unsigned int featureCount);
 
+double getCustomSplitztnb_fast (unsigned int n,
+                                char        *membership,
+                                double      *time,
+                                double      *event,
+                                
+                                unsigned int eventTypeSize,
+                                unsigned int eventTimeSize,
+                                double      *eventTime,
+                                
+                                double      *response,
+                                double       mean,
+                                double       variance,
+                                unsigned int maxLevel,
+                                
+                                double     **feature,
+                                unsigned int featureCount);
 
 double getCustomSplitStatisticMultivariateRegression  (unsigned int  n,
                                                        char         *membership,
