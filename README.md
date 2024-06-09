@@ -6,9 +6,10 @@ This package is written and maintained by *Fatemeh Masaebi*, *Morteza Mohammadza
 
 # Installation
 To install this package, follow these steps:
-1. install.packages("devtools")
-2. devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
-
+```
+install.packages("devtools")
+devtools::install_github("FatemehMasaebi/randomForestSRCHurdleNB")
+```
 
 # Example:
 Below is an example illustrating the utilization of the **rfsrc** function with two custom split rules and extracting parameter estimates.
@@ -36,6 +37,7 @@ rfztNB= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom2",
 # Get estimation for mu and phi for the test data
 predictNB(rfztNB, dat_test, dist = "negbin")
 
+#If computing time is an issue, you can use a faster and approximate version of the method by using the custom split "custom3".
 rfztNB_fast= rfsrc(y~x1+x2+x3+x4+x5+x6+x7+x8+x9, ntree = 5, splitrule="custom3",
               membership = T, data=dat_train)
 predictNB(rfztNB_fast, dat_test, dist = "negbin")
