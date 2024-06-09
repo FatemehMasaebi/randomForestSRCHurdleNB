@@ -53,6 +53,10 @@ void registerCustomFunctions() {
 
    registerThis (&getCustomSplitztnb, CLAS_FAM, 2);
    registerThis (&getCustomSplitztnb, REGR_FAM, 2);
+   
+   registerThis (&getCustomSplitztnb_fast, CLAS_FAM, 3);
+   registerThis (&getCustomSplitztnb_fast, REGR_FAM, 3);
+   
   //  registerThis (&getCustomSplitStatisticSurvivalTwo, SURV_FAM, 2);
   //  registerThis (&getCustomSplitStatisticCompetingRiskTwo, CRSK_FAM, 2);
 
@@ -383,7 +387,7 @@ double grad_ll_lmultheta (double lmu, double ltheta, double *data, int n){
 }
 
 //
-void newtonRaphson ( double *est_par, double *data, int n) {
+void newtonRaphson ( double *est_par, double *data, int n ) {
   double tol = 1e-5;
   int max_iter = 200;
   //double step_size = 1;
@@ -429,7 +433,7 @@ void newtonRaphson ( double *est_par, double *data, int n) {
   
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////zt split rule ////////////////////////////////////////////////////////////////////
 
 
 double getCustomSplitztnb (unsigned int n,
@@ -539,6 +543,166 @@ double getCustomSplitztnb (unsigned int n,
   sumLeftSqr=log_likelihood(test_par[0],test_par[1], responseL, Nplus_left);
   // est_par[2]={1,0.5};
   newtonRaphson(test_par,responseR,Nplus_right);
+  sumRghtSqr=log_likelihood(test_par[0],test_par[1], responseR, Nplus_right);
+  
+  delta = sumLeftSqr +sumRghtSqr;
+  return delta;
+}
+
+////////////// getCustomSplitztnb_fast//////////////////////////////////////////////////////////
+void newtonRaphson_fast ( double *est_par, double *data, int n ) {
+  double tol = 1e-5;
+  int max_iter = 20;
+  //double step_size = 1;
+  // Initial values for mu and theta
+  
+  double tempsum=0.0;
+  for( int i=1;i<=n;i++){
+    tempsum+=data[i];
+    
+  }
+  
+  est_par[0]= log(tempsum/n);
+  est_par[1]=0.5;
+  
+  double hess11, hess22, hess12, hess21,  hess_det_inv;
+  double hess_inv11, hess_inv22, hess_inv12, hess_inv21;
+  double update_est_lmu ,update_est_ltheta;
+  
+  int iter = 0;
+  do {
+    hess11=grad_ll_lmu2(est_par[0],est_par[1],data,n);
+    hess22=grad_ll_ltheta2(est_par[0],est_par[1],data,n);
+    hess12=grad_ll_lmultheta(est_par[0],est_par[1],data,n);
+    hess21=hess12;
+    
+    hess_det_inv= 1/(hess11*hess22 - hess12*hess21);
+    
+    hess_inv11=hess_det_inv*hess22;
+    hess_inv22=hess_det_inv*hess11;
+    hess_inv12= -hess_det_inv*hess12;
+    hess_inv21= -hess_det_inv*hess21;
+    
+    update_est_lmu = hess_inv11*grad_ll_lmu(est_par[0],est_par[1],data,n) + hess_inv12*grad_ll_ltheta(est_par[0],est_par[1],data,n) ;
+    update_est_ltheta = hess_inv21*grad_ll_lmu(est_par[0],est_par[1],data,n) +  hess_inv22*grad_ll_ltheta(est_par[0],est_par[1],data,n) ;
+    
+    est_par[0] -=   update_est_lmu;
+    est_par[1] -=  update_est_ltheta;
+    // printf("lmu=%f,iter=%d ,n=%d\n", est_par[0],iter,n);
+    
+    iter++;
+    
+  } while ((fabs(update_est_lmu) > tol || fabs(update_est_ltheta) > tol) && iter < max_iter);
+  
+}
+
+double getCustomSplitztnb_fast (unsigned int n,
+                           char        *membership,
+                           double      *time,
+                           double      *event,
+                           
+                           unsigned int eventTypeSize,
+                           unsigned int eventTimeSize,
+                           double      *eventTime,
+                           
+                           double      *response,
+                           double       mean,
+                           double       variance,
+                           unsigned int maxLevel,
+                           
+                           double     **feature,
+                           unsigned int featureCount)
+{
+  
+  // EXAMPLE:  Multivariate Regression
+  
+  // Local variables needed for this example:
+  double sumLeft, sumRght;
+  double sumLeftSqr, sumRghtSqr;
+  double delta;
+  
+  // Left and right normalization sizes.
+  unsigned int leftSize, rghtSize;
+  
+  unsigned int i;
+  
+  // Initialization of local variables:
+  sumLeft = sumRght = 0.0;
+  leftSize = rghtSize = 0;
+  
+  delta = 0.0;
+  
+  int sum_eve_left;
+  sum_eve_left=0;
+  
+  int sum_eve_right;
+  sum_eve_right=0;
+  
+  int N0_left,Nplus_left,N0_right,Nplus_right;
+  N0_left=Nplus_left=N0_right=Nplus_right=0;
+  
+  
+  
+  // In general, calculating a split statistic will require iterating
+  // over all members in the parent node, and ascertaining daughter
+  // membership, and performing a well defined calculation based on
+  // membership.  In this example, the sum of the difference from the
+  // mean for the y-outcome in each daughter node is calculated.
+  
+  for (i=0; i<n; i++) {
+    // Membership will be either LEFT or RIGHT.
+    if (membership[i] == LEFT) {
+      // Add the left member to the sum.
+      sum_eve_left=response[i];
+      if(sum_eve_left==0) N0_left+=1;
+      else Nplus_left+=1;
+      
+      sumLeft+= response[i];
+      leftSize ++;
+      
+    }
+    else {
+      sum_eve_right=response[i];
+      if(sum_eve_right==0) N0_right+=1;
+      else Nplus_right+=1;
+      sumRght+= response[i];
+      rghtSize ++;
+      
+    }
+  }
+  
+  
+  unsigned int jl, jr;
+  jl=jr=1;
+  double responseL[Nplus_left];
+  double responseR[Nplus_right];
+  
+  for (i=0; i<n; i++) {
+    // Membership will be either LEFT or RIGHT.
+    if (membership[i] == LEFT) {
+      // Add the left member to the sum.
+      sum_eve_left=response[i];
+      if(sum_eve_left!=0){
+        responseL[jl]=response[i];
+        jl++;
+      }
+    }
+    else {
+      sum_eve_right=response[i];
+      if(sum_eve_right!=0) {
+        responseR[jr]=response[i];
+        jr++;
+      }
+    }
+    
+  }
+  
+  double test_par[2]={1.00,0.5};
+  
+  newtonRaphson_fast(test_par,responseL,Nplus_left);
+  sumLeftSqr=log_likelihood(test_par[0],test_par[1], responseL, Nplus_left);
+  // est_par[2]={1,0.5};
+  newtonRaphson_fast(test_par,responseR,Nplus_right);
   sumRghtSqr=log_likelihood(test_par[0],test_par[1], responseR, Nplus_right);
   
   delta = sumLeftSqr +sumRghtSqr;
